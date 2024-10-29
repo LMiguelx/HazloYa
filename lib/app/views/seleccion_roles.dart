@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
-import 'registrar_datos.dart'; // Importa el formulario de registro
+import 'dart:convert'; // Para convertir desde JSON
+import 'registrar_datos.dart'; // Asegúrate de importar la pantalla de registro de datos
 
 class RoleSelectionScreen extends StatelessWidget {
+  final String userDataJson; // Recibir la cadena JSON
+
+  RoleSelectionScreen(
+      {required this.userDataJson}); // Constructor para recibir los datos
+
   @override
   Widget build(BuildContext context) {
+    // Convertir la cadena JSON de nuevo a un mapa
+    Map<String, dynamic> userData = json.decode(userDataJson);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Selecciona tu Rol'),
@@ -22,10 +31,15 @@ class RoleSelectionScreen extends StatelessWidget {
               SizedBox(height: 20),
               GestureDetector(
                 onTap: () {
+                  userData['tipo_usuario'] =
+                      'Contratista'; // Asignar el tipo de usuario
                   // Navega al formulario de registro al seleccionar Contratista
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => RegistrarDatosScreen()),
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          RegistrarDatosScreen(userData: userData),
+                    ),
                   );
                 },
                 child: Card(
@@ -47,10 +61,15 @@ class RoleSelectionScreen extends StatelessWidget {
               SizedBox(height: 20),
               GestureDetector(
                 onTap: () {
+                  userData['tipo_usuario'] =
+                      'Colaborador'; // Asignar el tipo de usuario
                   // Navega al formulario de registro al seleccionar Colaborador
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => RegistrarDatosScreen()),
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          RegistrarDatosScreen(userData: userData),
+                    ),
                   );
                 },
                 child: Card(

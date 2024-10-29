@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'seleccion_roles.dart'; // Importa la pantalla de selección de roles
+import 'login_register.dart'; // Asegúrate de importar la pantalla de LoginRegister
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -15,7 +15,8 @@ class _SplashScreenState extends State<SplashScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-            builder: (context) => RoleSelectionScreen()), // Navega a la pantalla de selección de roles
+            builder: (context) =>
+                LoginRegisterScreen()), // Navega a la pantalla de Login/Register
       );
     });
   }
@@ -23,11 +24,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Quitar el fondo azul
-      backgroundColor: Colors.white, // Cambia el color de fondo a blanco
+      backgroundColor: Colors.white, // Fondo blanco
       body: Center(
-        // Aumentar el tamaño de la imagen
-        child: Image.asset('assets/images/logo.png', width: 200, height: 200), // Aumenta el tamaño a 200x200
+        child: Image.asset('assets/images/logo.png',
+            width: 250, height: 250), // Tamaño del logo
       ),
     );
   }
