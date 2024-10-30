@@ -1,14 +1,12 @@
 import 'dart:convert'; // Importa para el manejo de JSON
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http; // Importa para hacer solicitudes HTTP
-import 'package:geolocator/geolocator.dart'; // Importa el paquete geolocator
 import 'enviar_documentos.dart'; // Asegúrate de que el archivo se llame así
 
 class RegistrarDatosScreen extends StatelessWidget {
-  final Map<String, dynamic> userData; // Recibir el mapa de datos del usuario
+  final Map<String, dynamic> userData; // Recibe el mapa de datos del usuario, incluyendo la contraseña
 
-  RegistrarDatosScreen(
-      {required this.userData}); // Constructor para recibir los datos
+  RegistrarDatosScreen({required this.userData}); // Constructor para recibir los datos
 
   final TextEditingController nombreController = TextEditingController();
   final TextEditingController apellidoController = TextEditingController();
@@ -17,15 +15,12 @@ class RegistrarDatosScreen extends StatelessWidget {
   final TextEditingController ciudadController = TextEditingController();
   final TextEditingController distritoController = TextEditingController();
   final TextEditingController telefonoController = TextEditingController();
-  final TextEditingController ubicacionController =
-      TextEditingController(); // Controlador para la ubicación
 
   @override
   Widget build(BuildContext context) {
-    String tipoUsuario = userData['tipo_usuario'] ??
-        'Desconocido'; // 'Desconocido' si no se proporciona
-
-    // Rellenar los controladores de texto con datos de usuario
+    String tipoUsuario = userData['tipo_usuario'] ?? 'Desconocido';
+    String password = userData['password'] ?? ''; 
+    
     nombreController.text = userData['nombre'] ?? '';
     apellidoController.text = userData['apellido'] ?? '';
     emailController.text = userData['email'] ?? '';
@@ -40,7 +35,6 @@ class RegistrarDatosScreen extends StatelessWidget {
         backgroundColor: Colors.blueAccent,
       ),
       body: SingleChildScrollView(
-        // Envuelve el contenido en un SingleChildScrollView
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -72,7 +66,7 @@ class RegistrarDatosScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: 'Apellido',
                   border: OutlineInputBorder(),
-                  hintText: 'Ingresa tu apellido',
+                  hintText: 'Ingresa tus apellidos',
                 ),
               ),
               SizedBox(height: 20),
@@ -124,30 +118,12 @@ class RegistrarDatosScreen extends StatelessWidget {
               ),
               SizedBox(height: 20),
               TextField(
-                controller: ubicacionController,
-                decoration: InputDecoration(
-                  labelText: 'Ubicación',
-                  border: OutlineInputBorder(),
-                  hintText: 'Toca para obtener tu ubicación',
-                ),
-                readOnly: true, // Hacer el campo no editable
-                onTap: () async {
-                  // Obtener la ubicación actual
-                  Position? position = await _getCurrentLocation();
-                  if (position != null) {
-                    ubicacionController.text =
-                        "${position.latitude}, ${position.longitude}";
-                  }
-                },
-              ),
-              SizedBox(height: 20),
-              TextField(
                 controller: TextEditingController(text: tipoUsuario),
                 decoration: InputDecoration(
                   labelText: 'Tipo de Usuario',
                   border: OutlineInputBorder(),
                 ),
-                readOnly: true, // Hacer el campo no editable
+                readOnly: true,
               ),
               SizedBox(height: 40),
               ElevatedButton(
@@ -162,35 +138,41 @@ class RegistrarDatosScreen extends StatelessWidget {
                     'ciudad': ciudadController.text,
                     'distrito': distritoController.text,
                     'telefono': telefonoController.text,
-                    'ubicacion': ubicacionController.text,
+                    'password': password, 
                   };
 
-                  // Enviar datos a la API
-                  final response = await http.post(
-                    Uri.parse('http://localhost:3000/api/users/register'),
-                    headers: <String, String>{
-                      'Content-Type': 'application/json; charset=UTF-8',
-                    },
-                    body: jsonEncode(data),
-                  );
+                  print(data);
 
-                  if (response.statusCode == 200) {
-                    // Si la respuesta es OK, navega a EnviarDocumentosScreen
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Datos registrados con éxito')),
+                  try {
+                    // Enviar datos a la API
+                    final response = await http.post(
+                      Uri.parse('http://192.168.98.133:3000/api/users/register'),
+                      headers: <String, String>{
+                        'Content-Type': 'application/json; charset=UTF-8',
+                      },
+                      body: jsonEncode(data),
                     );
 
-                    // Navegar a la pantalla para enviar documentos
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => EnviarDocumentosScreen()),
-                    );
-                  } else {
-                    // Si hay un error, muestra un mensaje
-                    print('Error al registrar: ${response.body}');
+                    if (response.statusCode == 200 || response.statusCode == 201) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Datos registrados con éxito')),
+                      );
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => EnviarDocumentosScreen()),
+                      );
+                    } else {
+                      print('Error en el registro: ${response.body}');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error al registrar los datos')),
+                      );
+                    }
+                  } catch (e) {
+                    print('Error de conexión: $e');
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error al registrar los datos')),
+                      SnackBar(content: Text('Error de conexión con el servidor')),
                     );
                   }
                 },
@@ -210,27 +192,5 @@ class RegistrarDatosScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Future<Position?> _getCurrentLocation() async {
-    // Solicitar permiso de ubicación
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        // Si el permiso fue denegado, muestra un mensaje
-        print('Permiso de ubicación denegado');
-        return null; // Retorna null si no se permite la ubicación
-      }
-    }
-
-    // Obtener la posición actual
-    try {
-      return await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-    } catch (e) {
-      print('Error al obtener la ubicación: $e');
-      return null; // Retorna null si hay un error al obtener la ubicación
-    }
   }
 }
