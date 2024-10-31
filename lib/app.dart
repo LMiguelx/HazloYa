@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hazloya/app/views/splash.dart'; // Asegúrate de importar la vista que deseas mostrar primero
+import 'package:hazloya/app/views/Interfaz/splash.dart'; // Asegúrate de importar la vista que deseas mostrar primero
 
 class MyApp extends StatelessWidget {
   @override

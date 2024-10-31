@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'login_register.dart'; // Asegúrate de importar la pantalla de LoginRegister
+import '../Auth/login_register.dart'; // Asegúrate de importar la pantalla de LoginRegister
 
 class SplashScreen extends StatefulWidget {
   @override
